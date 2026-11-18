@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -15,6 +14,8 @@
   .error { color: #e74c3c; margin-top: 16px; font-size: 14px; }
   .hidden { display: none; }
   .hint { font-size: 12px; color: #999; margin-top: 20px; }
+  .btn { display: inline-block; margin-top: 12px; padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; }
+  .btn:hover { background: #2980b9; }
 </style>
 </head>
 <body>
@@ -24,6 +25,7 @@
   <div class="info" id="info">Cargando audio...</div>
   <audio id="audioPlayer" controls preload="metadata" crossorigin="anonymous"></audio>
   <div id="error" class="error hidden"></div>
+  <a id="btnDownload" class="btn hidden" target="_blank">Descargar audio</a>
   <p class="hint">Cada QR reproduce solo la grabación de su alumno correspondiente.</p>
 </div>
 
@@ -33,20 +35,24 @@ const fileId = params.get('id');
 const infoEl = document.getElementById('info');
 const audioEl = document.getElementById('audioPlayer');
 const errorEl = document.getElementById('error');
+const btnDownload = document.getElementById('btnDownload');
 
 if (!fileId) {
   infoEl.textContent = 'No se especificó ningún audio.';
   errorEl.textContent = 'Falta el ID del archivo en el enlace.';
   errorEl.classList.remove('hidden');
 } else {
-  // Enlaces alternativos de Drive para audio
-  // Prueba con export=download primero; si falla, cambia a export=view
+  // Intento 1: enlace directo de descarga de Drive
   audioEl.src = `https://drive.google.com/uc?export=download&id=${fileId}`;
   infoEl.textContent = 'Reproduciendo nota de voz...';
 
   audioEl.onerror = () => {
-    errorEl.textContent = 'No se pudo cargar el audio. Verifica que el archivo de Drive esté compartido como "Cualquier persona con el enlace puede ver".';
+    // Intento 2: si falla, ofrecer descarga directa o abrir en Drive
+    errorEl.textContent = 'No se pudo reproducir directamente desde este navegador.';
     errorEl.classList.remove('hidden');
+    btnDownload.href = `https://drive.google.com/uc?export=download&id=${fileId}`;
+    btnDownload.classList.remove('hidden');
+    btnDownload.textContent = 'Descargar archivo de audio';
   };
 }
 </script>
