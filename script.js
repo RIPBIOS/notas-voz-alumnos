@@ -1,7 +1,7 @@
 // ============================================
 // CONFIGURACIÓN
 // ============================================
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzG7b-cndMSXGy7HqOpnFALix48Sl86EuOwh4jDEH-GyJWUM3eU_HIgnu3Z_KbHiCNLaQ/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby4kWjtlc5E-dbvDkcpCY2hk4DqA4kWrn3mht_wb_nr9PRxEWDVoaN4ZirP1mZmDFS03A/exec';
 const LISTEN_BASE_URL = 'https://ripbios.github.io/notas-voz-alumnos/escuchar.html';
 
 // ============================================
