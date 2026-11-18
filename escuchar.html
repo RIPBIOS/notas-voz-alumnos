@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -21,7 +22,7 @@
 <div class="card">
   <h1>🎧 Nota de Voz del Alumno</h1>
   <div class="info" id="info">Cargando audio...</div>
-  <audio id="audioPlayer" controls preload="metadata"></audio>
+  <audio id="audioPlayer" controls preload="metadata" crossorigin="anonymous"></audio>
   <div id="error" class="error hidden"></div>
   <p class="hint">Cada QR reproduce solo la grabación de su alumno correspondiente.</p>
 </div>
@@ -33,38 +34,18 @@ const infoEl = document.getElementById('info');
 const audioEl = document.getElementById('audioPlayer');
 const errorEl = document.getElementById('error');
 
-// ============================================
-// CONFIGURA AQUÍ la URL de tu Apps Script
-// (opcional: sirve para mostrar nombre/nivel/grupo)
-// ============================================
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/TU_DEPLOYMENT_ID/exec';
-
 if (!fileId) {
   infoEl.textContent = 'No se especificó ningún audio.';
   errorEl.textContent = 'Falta el ID del archivo en el enlace.';
   errorEl.classList.remove('hidden');
 } else {
-  // Enlace directo al archivo en Google Drive.
-  // El archivo debe estar compartido como "Cualquier persona con el enlace puede ver".
+  // Enlaces alternativos de Drive para audio
+  // Prueba con export=download primero; si falla, cambia a export=view
   audioEl.src = `https://drive.google.com/uc?export=download&id=${fileId}`;
   infoEl.textContent = 'Reproduciendo nota de voz...';
 
-  // Opcional: cargar metadatos desde Apps Script (requiere CORS, ya incluido en Code.gs)
-  /*
-  fetch(`${APPS_SCRIPT_URL}?action=metadata&id=${fileId}`)
-    .then((r) => r.json())
-    .then((d) => {
-      if (d.nombre) {
-        infoEl.textContent = `${d.nombre} - ${d.nivel} (${d.grupo})`;
-      }
-    })
-    .catch(() => {
-      // Si falla, se sigue mostrando el reproductor con el enlace directo
-    });
-  */
-
   audioEl.onerror = () => {
-    errorEl.textContent = 'No se pudo cargar el audio. Asegúrate de que el archivo de Drive esté compartido públicamente.';
+    errorEl.textContent = 'No se pudo cargar el audio. Verifica que el archivo de Drive esté compartido como "Cualquier persona con el enlace puede ver".';
     errorEl.classList.remove('hidden');
   };
 }
