@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escuchar Nota de Voz</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 40px auto; padding: 20px; background: #f5f7fa; color: #222; text-align: center; }
+  .card { background: white; padding: 32px 24px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); display: inline-block; width: 100%; }
+  h1 { color: #2c3e50; margin: 0 0 8px 0; font-size: 22px; }
+  .info { color: #555; font-size: 14px; margin-bottom: 20px; min-height: 24px; }
+  audio { width: 100%; margin-top: 10px; }
+  .error { color: #e74c3c; margin-top: 16px; font-size: 14px; }
+  .hidden { display: none; }
+  .hint { font-size: 12px; color: #999; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>🎧 Nota de Voz del Alumno</h1>
+  <div class="info" id="info">Cargando audio...</div>
+  <audio id="audioPlayer" controls preload="metadata"></audio>
+  <div id="error" class="error hidden"></div>
+  <p class="hint">Cada QR reproduce solo la grabación de su alumno correspondiente.</p>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const fileId = params.get('id');
+const infoEl = document.getElementById('info');
+const audioEl = document.getElementById('audioPlayer');
+const errorEl = document.getElementById('error');
+
+// ============================================
+// CONFIGURA AQUÍ la URL de tu Apps Script
+// (opcional: sirve para mostrar nombre/nivel/grupo)
+// ============================================
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/TU_DEPLOYMENT_ID/exec';
+
+if (!fileId) {
+  infoEl.textContent = 'No se especificó ningún audio.';
+  errorEl.textContent = 'Falta el ID del archivo en el enlace.';
+  errorEl.classList.remove('hidden');
+} else {
+  // Enlace directo al archivo en Google Drive.
+  // El archivo debe estar compartido como "Cualquier persona con el enlace puede ver".
+  audioEl.src = `https://drive.google.com/uc?export=download&id=${fileId}`;
+  infoEl.textContent = 'Reproduciendo nota de voz...';
+
+  // Opcional: cargar metadatos desde Apps Script (requiere CORS, ya incluido en Code.gs)
+  /*
+  fetch(`${APPS_SCRIPT_URL}?action=metadata&id=${fileId}`)
+    .then((r) => r.json())
+    .then((d) => {
+      if (d.nombre) {
+        infoEl.textContent = `${d.nombre} - ${d.nivel} (${d.grupo})`;
+      }
+    })
+    .catch(() => {
+      // Si falla, se sigue mostrando el reproductor con el enlace directo
+    });
+  */
+
+  audioEl.onerror = () => {
+    errorEl.textContent = 'No se pudo cargar el audio. Asegúrate de que el archivo de Drive esté compartido públicamente.';
+    errorEl.classList.remove('hidden');
+  };
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nota de Voz Alumno - Generador QR</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 520px; margin: 0 auto; padding: 20px; background: #f5f7fa; color: #333; }
+  h1 { text-align: center; color: #2c3e50; margin-bottom: 24px; }
+  .card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .form-group { margin-bottom: 16px; }
+  label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; color: #555; }
+  input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+  button { width: 100%; padding: 12px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+  button:disabled { opacity: 0.6; cursor: not-allowed; }
+  .btn-record { background: #e74c3c; color: white; }
+  .btn-record.recording { background: #c0392b; animation: pulse 1.5s infinite; }
+  .btn-save { background: #27ae60; color: white; margin-top: 10px; }
+  .btn-save:disabled { background: #95a5a6; }
+  .btn-small { width: auto; padding: 8px 14px; font-size: 14px; }
+  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.75; } 100% { opacity: 1; } }
+  #preview { margin-top: 16px; }
+  audio { width: 100%; margin-top: 10px; }
+  #qr-container { margin-top: 20px; text-align: center; display: none; }
+  #qrCode { margin: 0 auto; }
+  .status { margin-top: 12px; font-size: 14px; min-height: 22px; }
+  .success { color: #27ae60; font-weight: 600; }
+  .error { color: #e74c3c; font-weight: 600; }
+  .hidden { display: none !important; }
+  .hint { font-size: 12px; color: #888; margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>🎙️ Nota de Voz</h1>
+
+  <form id="formAlumno">
+    <div class="form-group">
+      <label>Nombre del alumno</label>
+      <input type="text" id="nombre" placeholder="Ej: Juan Pérez" required>
+    </div>
+    <div class="form-group">
+      <label>Nivel educativo</label>
+      <select id="nivel" required>
+        <option value="">-- Selecciona --</option>
+        <option value="Prescolar">Prescolar</option>
+        <option value="Primaria">Primaria</option>
+        <option value="Secundaria">Secundaria</option>
+        <option value="Bachillerato">Bachillerato</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Grupo</label>
+      <input type="text" id="grupo" placeholder="Ej: 1-A, 3-B" required>
+    </div>
+  </form>
+
+  <div class="form-group">
+    <button type="button" id="btnRecord" class="btn-record">Iniciar grabación</button>
+  </div>
+
+  <div id="preview" class="hidden">
+    <button type="button" id="btnPlay" class="btn-small" style="background:#3498db; color:white; margin-right:8px;">Escuchar previa</button>
+    <button type="button" id="btnReRecord" class="btn-small" style="background:#f39c12; color:white;">Regrabar</button>
+    <audio id="audioPreview" controls></audio>
+  </div>
+
+  <div class="form-group">
+    <button type="button" id="btnSave" class="btn-save hidden">Guardar y generar QR</button>
+  </div>
+
+  <div id="status"></div>
+
+  <div id="qr-container">
+    <h3 style="margin-top:0;">Código QR del alumno</h3>
+    <div id="qrCode"></div>
+    <p class="hint">Imprime este QR y pégalo en el trabajo del alumno.</p>
+    <button type="button" id="btnDownloadQr" class="btn-small" style="background:#3498db; color:white; margin-top:8px;">Descargar QR (PNG)</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
