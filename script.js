@@ -7,7 +7,7 @@
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzG7b-cndMSXGy7HqOpnFALix48Sl86EuOwh4jDEH-GyJWUM3eU_HIgnu3Z_KbHiCNLaQ/exec';
 
 // 2. URL base donde alojarás escuchar.html (GitHub Pages, Netlify, Firebase Hosting, etc.)
-const LISTEN_BASE_URL = 'https://tu-usuario.github.io/tu-repo/escuchar.html';
+const LISTEN_BASE_URL = 'https://github.com/RIPBIOS/notas-voz-alumnos/escuchar.html';
 
 // ============================================
 // ESTADO
