@@ -2,12 +2,10 @@
 // CONFIGURACIÓN
 // ============================================
 // 1. Reemplaza con la URL de tu Google Apps Script desplegado como Web App.
-//    Se obtiene al publicar: Implementar > Nueva implementación > Tipo: Aplicación web.
-//    Ejemplo: https://script.google.com/macros/s/ABC123.../exec
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzG7b-cndMSXGy7HqOpnFALix48Sl86EuOwh4jDEH-GyJWUM3eU_HIgnu3Z_KbHiCNLaQ/exec';
 
 // 2. URL base donde alojarás escuchar.html (GitHub Pages, Netlify, Firebase Hosting, etc.)
-const LISTEN_BASE_URL = 'https://github.com/RIPBIOS/notas-voz-alumnos/escuchar.html';
+const LISTEN_BASE_URL = 'https://ripbios.github.io/notas-voz-alumnos/escuchar.html';
 
 // ============================================
 // ESTADO
@@ -27,12 +25,12 @@ const btnReRecord = document.getElementById('btnReRecord');
 const btnDownloadQr = document.getElementById('btnDownloadQr');
 const preview = document.getElementById('preview');
 const audioPreview = document.getElementById('audioPreview');
-const qrContainer = document.getElementById('qrContainer');
+const qrContainer = document.getElementById('qr-container'); // CORREGIDO: coincide con el HTML
 const qrCodeEl = document.getElementById('qrCode');
 const status = document.getElementById('status');
 
 function setStatus(msg, type = '') {
-  status.textContent = msg;
+  if (status) status.textContent = msg;
   status.className = 'status ' + type;
 }
 
@@ -53,13 +51,15 @@ async function startRecording() {
       const blob = new Blob(audioChunks, { type: 'audio/webm' });
       recordedBlob = blob;
       const url = URL.createObjectURL(blob);
-      audioPreview.src = url;
-      preview.classList.remove('hidden');
+      if (audioPreview) audioPreview.src = url;
+      if (preview) preview.classList.remove('hidden');
 
-      btnRecord.classList.remove('recording');
-      btnRecord.textContent = 'Iniciar grabación';
-      btnSave.classList.remove('hidden');
-      qrContainer.style.display = 'none';
+      if (btnRecord) {
+        btnRecord.classList.remove('recording');
+        btnRecord.textContent = 'Iniciar grabación';
+      }
+      if (btnSave) btnSave.classList.remove('hidden');
+      if (qrContainer) qrContainer.style.display = 'none';
 
       // Detener pistas del micrófono
       stream.getTracks().forEach((t) => t.stop());
@@ -68,9 +68,11 @@ async function startRecording() {
     };
 
     mediaRecorder.start();
-    btnRecord.textContent = 'Detener grabación';
-    btnRecord.classList.add('recording');
-    btnSave.classList.add('hidden');
+    if (btnRecord) {
+      btnRecord.textContent = 'Detener grabación';
+      btnRecord.classList.add('recording');
+    }
+    if (btnSave) btnSave.classList.add('hidden');
     setStatus('Grabando... habla ahora');
   } catch (err) {
     console.error(err);
@@ -87,14 +89,14 @@ btnRecord.addEventListener('click', () => {
 });
 
 btnPlay.addEventListener('click', () => {
-  audioPreview.play();
+  if (audioPreview) audioPreview.play();
 });
 
 btnReRecord.addEventListener('click', () => {
-  preview.classList.add('hidden');
+  if (preview) preview.classList.add('hidden');
   recordedBlob = null;
-  btnSave.classList.add('hidden');
-  qrContainer.style.display = 'none';
+  if (btnSave) btnSave.classList.add('hidden');
+  if (qrContainer) qrContainer.style.display = 'none';
   setStatus('Listo para grabar de nuevo.');
 });
 
@@ -115,15 +117,16 @@ btnSave.addEventListener('click', async () => {
     return;
   }
 
-  btnSave.disabled = true;
-  btnSave.textContent = 'Subiendo...';
+  if (btnSave) {
+    btnSave.disabled = true;
+    btnSave.textContent = 'Subiendo...';
+  }
   setStatus('Subiendo audio a Google Drive...');
 
-  // Convertir blob a Data URL (base64) para enviarlo por JSON a Apps Script
   const reader = new FileReader();
   reader.readAsDataURL(recordedBlob);
   reader.onloadend = async () => {
-    const base64Audio = reader.result; // data:audio/webm;base64,...
+    const base64Audio = reader.result;
 
     const payload = {
       nombre,
@@ -146,24 +149,31 @@ btnSave.addEventListener('click', async () => {
 
       // Generar QR con la URL de escucha
       const listenUrl = `${LISTEN_BASE_URL}?id=${currentFileId}`;
-      qrCodeEl.innerHTML = ''; // limpiar canvas previo
-      new QRCode(qrCodeEl, {
-        text: listenUrl,
-        width: 256,
-        height: 256,
-        colorDark: '#000000',
-        colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.H
-      });
+      if (qrCodeEl) {
+        qrCodeEl.innerHTML = ''; // limpiar canvas previo
+        new QRCode(qrCodeEl, {
+          text: listenUrl,
+          width: 256,
+          height: 256,
+          colorDark: '#000000',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.H
+        });
+      }
 
-      qrContainer.style.display = 'block';
-      btnSave.textContent = 'Guardado ✔';
+      if (qrContainer) qrContainer.style.display = 'block';
+      if (btnSave) {
+        btnSave.textContent = 'Guardado ✔';
+        btnSave.disabled = false;
+      }
       setStatus(`Audio guardado. ID: ${currentFileId}`, 'success');
     } catch (err) {
       console.error(err);
       setStatus('Error: ' + err.message, 'error');
-    } finally {
-      btnSave.disabled = false;
+      if (btnSave) {
+        btnSave.disabled = false;
+        btnSave.textContent = 'Guardar y generar QR';
+      }
     }
   };
 });
@@ -172,6 +182,7 @@ btnSave.addEventListener('click', async () => {
 // DESCARGAR QR
 // ============================================
 btnDownloadQr.addEventListener('click', () => {
+  if (!qrCodeEl) return;
   const canvas = qrCodeEl.querySelector('canvas');
   if (!canvas) return;
 
