@@ -41,27 +41,33 @@ const errorEl = document.getElementById('error');
 const btnOpen = document.getElementById('btnOpenDrive');
 const btnDownload = document.getElementById('btnDownload');
 
-const driveDirect = `https://drive.google.com/uc?export=download&id=${fileId}`;
-const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(driveDirect)}`;
+// Diferentes formas de acceder al archivo en Drive
+const urls = [
+  `https://drive.google.com/uc?id=${fileId}`,                                          // vista directa
+  `https://drive.google.com/uc?export=view&id=${fileId}`,                              // export view
+  `https://drive.google.com/uc?export=download&id=${fileId}`,                          // descarga directa
+  `https://drive.usercontent.google.com/download?id=${fileId}&export=download`         // dominio alternativo
+];
 
-let triedProxy = false;
+let currentUrlIndex = 0;
+let triedAll = false;
 
-if (!fileId) {
-  infoEl.textContent = 'No se especificó ningún audio.';
-  errorEl.textContent = 'Falta el ID del archivo en el enlace.';
-  errorEl.classList.remove('hidden');
-} else {
-  audioEl.src = driveDirect;
-  infoEl.textContent = 'Intentando reproducir desde Drive...';
+function tryNextUrl() {
+  if (currentUrlIndex >= urls.length) {
+    showFallback();
+    return;
+  }
+
+  const url = urls[currentUrlIndex];
+  currentUrlIndex++;
+
+  infoEl.textContent = `Probando enlace ${currentUrlIndex} de ${urls.length}...`;
+  audioEl.src = url;
+  audioEl.load();
 
   audioEl.onerror = () => {
-    if (!triedProxy) {
-      triedProxy = true;
-      infoEl.textContent = 'Usando servidor intermedio para cargar el audio...';
-      audioEl.src = proxyUrl;
-    } else {
-      showFallback();
-    }
+    // Si falló, probamos el siguiente
+    tryNextUrl();
   };
 
   audioEl.onloadedmetadata = () => {
@@ -76,12 +82,20 @@ function showFallback() {
   btnDownload.classList.remove('hidden');
 }
 
+if (!fileId) {
+  infoEl.textContent = 'No se especificó ningún audio.';
+  errorEl.textContent = 'Falta el ID del archivo en el enlace.';
+  errorEl.classList.remove('hidden');
+} else {
+  tryNextUrl();
+}
+
 function openDrive() {
   window.open(`https://drive.google.com/file/d/${fileId}/view`, '_blank');
 }
 
 function downloadAudio() {
-  window.location.href = driveDirect;
+  window.location.href = `https://drive.google.com/uc?export=download&id=${fileId}`;
 }
 </script>
 
