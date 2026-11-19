@@ -13,9 +13,11 @@
   audio { width: 100%; margin-top: 10px; }
   .error { color: #e74c3c; margin-top: 16px; font-size: 14px; }
   .hidden { display: none; }
-  .hint { font-size: 12px; color: #999; margin-top: 20px; }
-  .btn { display: inline-block; margin-top: 12px; padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; }
+  .btn { display: inline-block; margin-top: 12px; padding: 12px 24px; background: #3498db; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; border: none; cursor: pointer; }
   .btn:hover { background: #2980b9; }
+  .btn-secondary { background: #95a5a6; margin-top: 8px; }
+  .btn-secondary:hover { background: #7f8c8d; }
+  .hint { font-size: 12px; color: #999; margin-top: 20px; }
 </style>
 </head>
 <body>
@@ -25,7 +27,8 @@
   <div class="info" id="info">Cargando audio...</div>
   <audio id="audioPlayer" controls preload="metadata" crossorigin="anonymous"></audio>
   <div id="error" class="error hidden"></div>
-  <a id="btnDownload" class="btn hidden" target="_blank">Descargar audio</a>
+  <button id="btnOpenDrive" class="btn hidden" onclick="openDrive()">▶ Abrir audio en Drive</button>
+  <button id="btnDownload" class="btn btn-secondary hidden" onclick="downloadAudio()">⬇ Descargar archivo</button>
   <p class="hint">Cada QR reproduce solo la grabación de su alumno correspondiente.</p>
 </div>
 
@@ -35,25 +38,50 @@ const fileId = params.get('id');
 const infoEl = document.getElementById('info');
 const audioEl = document.getElementById('audioPlayer');
 const errorEl = document.getElementById('error');
+const btnOpen = document.getElementById('btnOpenDrive');
 const btnDownload = document.getElementById('btnDownload');
+
+const driveDirect = `https://drive.google.com/uc?export=download&id=${fileId}`;
+const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(driveDirect)}`;
+
+let triedProxy = false;
 
 if (!fileId) {
   infoEl.textContent = 'No se especificó ningún audio.';
   errorEl.textContent = 'Falta el ID del archivo en el enlace.';
   errorEl.classList.remove('hidden');
 } else {
-  // Intento 1: enlace directo de descarga de Drive
-  audioEl.src = `https://drive.google.com/uc?export=download&id=${fileId}`;
-  infoEl.textContent = 'Reproduciendo nota de voz...';
+  audioEl.src = driveDirect;
+  infoEl.textContent = 'Intentando reproducir desde Drive...';
 
   audioEl.onerror = () => {
-    // Intento 2: si falla, ofrecer descarga directa o abrir en Drive
-    errorEl.textContent = 'No se pudo reproducir directamente desde este navegador.';
-    errorEl.classList.remove('hidden');
-    btnDownload.href = `https://drive.google.com/uc?export=download&id=${fileId}`;
-    btnDownload.classList.remove('hidden');
-    btnDownload.textContent = 'Descargar archivo de audio';
+    if (!triedProxy) {
+      triedProxy = true;
+      infoEl.textContent = 'Usando servidor intermedio para cargar el audio...';
+      audioEl.src = proxyUrl;
+    } else {
+      showFallback();
+    }
   };
+
+  audioEl.onloadedmetadata = () => {
+    infoEl.textContent = 'Listo para reproducir.';
+  };
+}
+
+function showFallback() {
+  errorEl.textContent = 'No se pudo reproducir directamente desde el navegador.';
+  errorEl.classList.remove('hidden');
+  btnOpen.classList.remove('hidden');
+  btnDownload.classList.remove('hidden');
+}
+
+function openDrive() {
+  window.open(`https://drive.google.com/file/d/${fileId}/view`, '_blank');
+}
+
+function downloadAudio() {
+  window.location.href = driveDirect;
 }
 </script>
 
